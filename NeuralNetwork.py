@@ -5,7 +5,7 @@ class NeuralNetwork(object):
         self.theta = []
         self.topology = topology
         self.numLabels = numLabels
-        self.gradientChecking = False
+        # setting the parameters randomly according to the topology provided
         for layer in range(len(self.topology)):
             if layer == 0:
                 continue
@@ -13,32 +13,25 @@ class NeuralNetwork(object):
     
     
     def gradientDescent(self, iters, alpha, lamda, X, Y):
+        """
+        Performs the gradient descent algorithm with iters iterations, alpha learning rate, lambda as regularization factor.
+        """
         self.X = X
         self.Y = Y
         for i in range(iters):
             (J, thetaGrad) = self.getCostAndGradient(lamda)
-            # gradient checking
-            if self.gradientChecking:
-                thetaCopy = self.theta.copy()
-                for i in range(len(self.topology) - 1):
-                    for j in range(self.topology[i + 1]):
-                        for k in range(self.topology[i]):
-                            EPS = 0.00001
-                            self.theta[i][j, k] += EPS
-                            J2 = self.getCostAndGradient(lamda)[0]
-                            self.theta[i][j, k] -= 2 * EPS
-                            J1 = self.getCostAndGradient(lamda)[0]
-                            print(str((J2 - J1) / (2 * EPS) - thetaGrad[i][j, k]))
-                self.theta = thetaCopy
-            # end
             for layer in range(len(self.topology) - 1):
                 self.theta[layer] -= thetaGrad[layer] * alpha
             print("Iter " + str(i) + ": " + str(J))
     
     
     def predict(self, x):
+        """
+        Predicts the output when the input is x using the learned parameters, that is, using theta.
+        """
         x = x.reshape((x.shape[0], 1))
         x = np.concatenate(([[1]], x))
+        # Forward Propogation
         for layer in range(1, len(self.topology)):
             x = np.matmul(self.theta[layer - 1], x)
             for i in range(x.shape[0]):
@@ -57,6 +50,9 @@ class NeuralNetwork(object):
     
     
     def getCostAndGradient(self, lamda):
+        """
+        Calculates the gradient and the cost on the given data using lambda as the regularization factor
+        """
         J = 0
         thetaGrad = []
         for layer in range(len(self.topology)):
@@ -124,9 +120,16 @@ class NeuralNetwork(object):
     
     
     def sigmoid(self, x):
+        """
+        Input: x is a floating point number
+        Returns: sigmoid(x)
+        """
         return 1 / (1 + np.exp(-x))
     
     
     def sigmoidDerivative(self, x):
+        """
+        Returns the result of applying the derivate of the sigmoid to x
+        """
         sig = self.sigmoid(x)
         return sig * (1 - sig)
